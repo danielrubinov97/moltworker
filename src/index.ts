@@ -195,22 +195,22 @@ app.use('*', async (c, next) => {
   return next();
 });
 
-// Middleware: Cloudflare Access authentication for protected routes
-app.use('*', async (c, next) => {
-  // Determine response type based on Accept header
+// Cloudflare Access authentication middleware (reusable)
+const accessAuth = async (c: any, next: any) => {
   const acceptsHtml = c.req.header('Accept')?.includes('text/html');
   const middleware = createAccessMiddleware({
     type: acceptsHtml ? 'html' : 'json',
     redirectOnMissing: acceptsHtml,
   });
-
   return middleware(c, next);
-});
+};
 
 // Mount API routes (protected by Cloudflare Access)
+app.use('/api/*', accessAuth);
 app.route('/api', api);
 
 // Mount Admin UI routes (protected by Cloudflare Access)
+app.use('/_admin/*', accessAuth);
 app.route('/_admin', adminUi);
 
 // Mount debug routes (protected by Cloudflare Access, only when DEBUG_ROUTES is enabled)
@@ -220,6 +220,7 @@ app.use('/debug/*', async (c, next) => {
   }
   return next();
 });
+app.use('/debug/*', accessAuth);
 app.route('/debug', debug);
 
 // =============================================================================
