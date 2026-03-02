@@ -205,8 +205,7 @@ const accessAuth = async (c: any, next: any) => {
   return middleware(c, next);
 };
 
-// Mount API routes (protected by Cloudflare Access)
-app.use('/api/*', accessAuth);
+// Mount API routes (admin routes have their own CF Access middleware internally)
 app.route('/api', api);
 
 // Mount Admin UI routes (protected by Cloudflare Access)
