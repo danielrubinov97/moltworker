@@ -244,12 +244,12 @@ if (process.env.OPENCLAW_DEFAULT_MODEL) {
     }
 }
 
-// Thinking level override (OPENCLAW_THINKING=off|low|medium|high)
+// Thinking level override (OPENCLAW_THINKING=off|minimal|low|medium|high|xhigh)
 if (process.env.OPENCLAW_THINKING) {
     const level = process.env.OPENCLAW_THINKING;
     config.agents = config.agents || {};
     config.agents.defaults = config.agents.defaults || {};
-    config.agents.defaults.thinking = level;
+    config.agents.defaults.thinkingDefault = level;
     console.log('Thinking level: ' + level);
 }
 
