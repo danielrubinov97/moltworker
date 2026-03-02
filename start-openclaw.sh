@@ -219,6 +219,40 @@ if (process.env.CF_AI_GATEWAY_MODEL) {
     }
 }
 
+// Direct model override (OPENCLAW_DEFAULT_MODEL=model-id)
+// Works with any provider (Anthropic, OpenAI) configured via onboard.
+// Sets the default model for all agents.
+if (process.env.OPENCLAW_DEFAULT_MODEL) {
+    const modelId = process.env.OPENCLAW_DEFAULT_MODEL;
+    config.models = config.models || {};
+    config.models.providers = config.models.providers || {};
+
+    // Find the first configured provider and ensure the model is listed
+    const providerNames = Object.keys(config.models.providers);
+    if (providerNames.length > 0) {
+        const providerName = providerNames[0];
+        const provider = config.models.providers[providerName];
+        const models = provider.models || [];
+        if (!models.some(m => m.id === modelId)) {
+            models.push({ id: modelId, name: modelId, contextWindow: 200000, maxTokens: 16384 });
+            provider.models = models;
+        }
+        config.agents = config.agents || {};
+        config.agents.defaults = config.agents.defaults || {};
+        config.agents.defaults.model = { primary: providerName + '/' + modelId };
+        console.log('Default model override: ' + providerName + '/' + modelId);
+    }
+}
+
+// Thinking level override (OPENCLAW_THINKING=off|low|medium|high)
+if (process.env.OPENCLAW_THINKING) {
+    const level = process.env.OPENCLAW_THINKING;
+    config.agents = config.agents || {};
+    config.agents.defaults = config.agents.defaults || {};
+    config.agents.defaults.thinking = level;
+    console.log('Thinking level: ' + level);
+}
+
 // Telegram configuration
 // Overwrite entire channel object to drop stale keys from old R2 backups
 // that would fail OpenClaw's strict config validation (see #47)
